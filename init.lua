@@ -1,3 +1,4 @@
+
 -- all functions below are optional and can be left out
 
 function OnModPreInit()
@@ -9,6 +10,10 @@ function OnModInit()
 end
 
 function OnModPostInit()
+	
+	
+	
+	
 	--print("Mod - OnModPostInit()") -- Then this is called for all mods
 end
 
@@ -39,6 +44,7 @@ end
 
 function OnWorldPostUpdate() -- This is called every time the game has finished updating the world
 	--GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) )
+	dofile("mods/sandbox_mode/files/ui/ui_main.lua")
 end
 
 

@@ -1,6 +1,6 @@
 <Mod
 	name="Sandbox Mode"
-	description="Adds a new game mode perfect for testing or tinkering."
+	description="Adds a new game mode perfect for testing or tinkering.\nYou cannot die, and are able to spawn in various items."
 	request_no_api_restrictions="0" 
 	ui_newgame_name="Sandbox"
 	ui_newgame_description="Test things in a dedicated world with no limits."
