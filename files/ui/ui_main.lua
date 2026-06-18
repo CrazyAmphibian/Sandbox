@@ -1,7 +1,15 @@
 dofile_once("data/scripts/lib/utilities.lua")
+
 --for spell indexing
 dofile_once("data/scripts/gun/gun_enums.lua")
 dofile_once("data/scripts/gun/gun_actions.lua")
+
+--perk spawns
+dofile_once("data/scripts/perks/perk.lua")
+dofile_once( "data/scripts/perks/perk_list.lua" )
+
+dofile_once("mods/sandbox_mode/files/tableserial.lua")
+
 function should_spell_be_shown(spelldata)
 	if menudata.spelloptions.hidenotunlocked and spelldata.spawn_requires_flag and (not HasFlagPersistent(spelldata.spawn_requires_flag)) then return false end
 	if menudata.spelloptions.hideunobtainable and (spelldata.spawn_level=="" or spelldata.spawn_probability=="" or spelldata.spawn_probability=="0") then return false end
@@ -54,13 +62,56 @@ function display_spell(spelldata,x,y)
 	GuiImageButton( sandbox_mode_ui, gui_next_id(), x, y, "", spelldata.sprite )
 end
 
+
+function should_perk_be_shown(perk)
+	if (not perk.not_in_default_perk_pool) and (not menudata.perkoptions.show_hm) then return false end
+	if (perk.not_in_default_perk_pool) and (not menudata.perkoptions.show_nothm) then return false end
+	
+	if (not perk.one_off_effect) and (not menudata.perkoptions.show_notoneoff) then return false end
+	if (perk.one_off_effect) and (not menudata.perkoptions.show_oneoff) then return false end
+	return true
+end
+
+function display_perk(perk,x,y)
+	if GuiImageButton(sandbox_mode_ui,gui_next_id(),x,y,"",perk.perk_icon) then
+		if player then
+			local pos_x, pos_y = EntityGetTransform( player )
+			perk_spawn( pos_x, pos_y, perk.id ,true)	
+		end
+	end
+	
+	_,_,hovered=GuiGetPreviousWidgetInfo(sandbox_mode_ui)
+	if hovered then
+		GuiZSetForNextWidget(sandbox_mode_ui,-1)
+		GuiText(sandbox_mode_ui,x,y-10,GameTextGetTranslatedOrNot(perk.ui_name) )
+		GuiZSetForNextWidget(sandbox_mode_ui,-1)
+		GuiText(sandbox_mode_ui,x,y+16,perk.id)
+	end
+end
+
+
 if not sandbox_mode_ui then
 	sandbox_mode_ui=GuiCreate()
 	sandbox_ui_open=false
 	menudata={active_menu=nil,
 		spelloptions={showproj=true,showstatic=true,showmod=true,showutil=true,showmaterial=true,showmulti=true,showpassive=true,showother=true,hidenotunlocked=false,hideunobtainable=false,page=0},
+		
+		teleportoptions={storedx=0,storedy=0,prevx=0,prevy=0,savedlocations={},selectedcat=nil,relativetopw=false},
+		
+		perkoptions={show_hm=true,show_nothm=true,show_oneoff=true,show_notoneoff=true},
+		
+		potionoptions={show_liquid=true,show_gas=true,show_sand=true,show_solids=true,show_all=false,targetmatcount=1000,spawnitem="potion"},
 	}
 	ticks=0
+	svd=GlobalsGetValue("sandboxmode_saved_tp_locations")
+	--print(svd)
+	local tt=menudata.teleportoptions.savedlocations
+	for e in svd:gmatch("[^\x1F]+") do
+		--print(e)
+		tt[#tt+1]=deserialtable(e)
+	end
+	
+	
 end
 ticks=ticks+1
 local width,height=GuiGetScreenDimensions(sandbox_mode_ui)
@@ -77,12 +128,11 @@ end
 
 if sandbox_ui_open then
 	
-	if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-100,40,menudata.active_menu=="spells" and "[spells]" or "spells") then menudata.active_menu="spells" end
-	if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-50,40,menudata.active_menu=="entities" and "[entities]" or "entities")  then menudata.active_menu="entities" end
-	if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,40,menudata.active_menu=="potions" and "[potions]" or "potions")  then menudata.active_menu="potions" end
-	if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+50,40,menudata.active_menu=="teleport" and "[teleport]" or "teleport")  then menudata.active_menu="teleport" end
-	if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+100,40,menudata.active_menu=="extra" and "[extra]" or "extra")  then menudata.active_menu="extra" end
-	
+	local menus={"spells","perks","potions","teleport"}
+	for i=1,#menus do
+		local m=menus[i]
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-50*((#menus+1)/2-i),40,menudata.active_menu==m and "["..m.."]" or m) then menudata.active_menu=m end
+	end
 	
 	if menudata.active_menu=="spells" then
 		local lc,rc=false,false
@@ -135,18 +185,208 @@ if sandbox_ui_open then
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-30,65,"<-") then menudata.spelloptions.page=math.max(menudata.spelloptions.page-1,0) end
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+30,65,"->") then menudata.spelloptions.page=math.min(menudata.spelloptions.page+1,math.ceil(n/180)-1) end
 		
-	elseif menudata.active_menu=="entities" then
+
+	elseif menudata.active_menu=="perks" then
+		
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+90,55,"Show HM perks [".. (menudata.perkoptions.show_hm and "X]" or " ]")) then menudata.perkoptions.show_hm=not menudata.perkoptions.show_hm end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+90,65,"Show non-HM perks [".. (menudata.perkoptions.show_nothm and "X]" or " ]")) then menudata.perkoptions.show_nothm=not menudata.perkoptions.show_nothm end
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+220,55,"Show One-off perks [".. (menudata.perkoptions.show_oneoff and "X]" or " ]")) then menudata.perkoptions.show_oneoff=not menudata.perkoptions.show_oneoff end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+220,65,"Show non-One-off perks [".. (menudata.perkoptions.show_notoneoff and "X]" or " ]")) then menudata.perkoptions.show_notoneoff=not menudata.perkoptions.show_notoneoff end
+		
+		local pc=0
+		for i=1,#perk_list do --should add pages, but i'm lazy and don't feel like it. should be big enough.
+			local perk=perk_list[i]
+			if should_perk_be_shown(perk) then
+				display_perk(perk,width/2+ 20*(pc%20-10),90+32*math.floor(pc/20))
+				pc=pc+1
+			end
+		end
+		
+		GuiText(sandbox_mode_ui,width/2,55,string.format("%i perks",pc) )
+		
 		
 	elseif menudata.active_menu=="potions" then
 		
-	elseif menudata.active_menu=="teleport" then
 		
-	elseif menudata.active_menu=="extra" then
+		
+	elseif menudata.active_menu=="teleport" and player then
+		local SIZE_PW = BiomeMapGetSize() * 512
+		--pw = if teleporting here is relative to your current PW instead of absolute
+		local cats={"bosses","orbs","quests","misc","saved"}
+		local hardcodelocations={
+			
+			misc={
+				{name="Spawn",x=227,y=-79,pw=true},
+				{name="Nullifying altar",x=14000,y=7552,pw=true,no_ngp=true},
+				{name="Race track",x=3390,y=2472,pw=true,no_ngp=true},
+				{name="Gold (East)",x=1590,y=-3340,pw=true,no_ngp=true},
+				{name="Gold (West)",x=-1470,y=16600,pw=true},
+				{name="The Tower (start)",x=9739,y=9197,pw=true,no_ngp=true},
+				{name="The Tower (end)",x=9985,y=4373,pw=true,no_ngp=true},
+				{name="Gourd cave",x=16100,y=-6344,},
+				{name="Rainbow trail",x=-14000,y=-2843,},
+				{name="Portal travel room",x=3828,y=7539,pw=true},
+				{name="Experimental wand (machine gun)",x=16088,y=10004,pw=true,no_ngp=true},
+			},
+			quests={
+				{name="Mountain altar",x=782,y=-1150,pw=true},
+				{name="The work",x=6397,y=15163,pw=true},
+				{name="Hiisi Anvil",x=1532,y=6062,pw=true,no_ngp=true},
+				{name="End of everything",x=-4865,y=15000,pw=true},
+				{name="Choral chest",x=11517,y=-4862,pw=true},
+				{name="Dark chest",x=3838,y=15618,pw=true},
+				{name="Music stone",x=-3333,y=3333,pw=true,no_ngp=true},
+				{name="Moon",x=255,y=-26100},
+				{name="Dark moon",x=255,y=37517},
+				{name="Essence of Spirits",x=-14080,y=13583,pw=true,},
+				{name="Essence of Air",x=-13056,y=-5359,pw=true,},
+				{name="Essence of Fire",x=-14063,y=368,},
+				{name="Essence of Earth",x=16127,y=-1793,pw=true,},
+				{name="Essence of Water",x=-5377,y=16648,pw=true,},
+				{name="Essence eater (west)",x=-6843,y=-244,pw=true,},
+				{name="Essence eater (east)",x=12600,y=-35,pw=true,},
+				{name="Kantele",x=-1635,y=-778},
+				{name="Ocarina",x=-9980,y=-6479,pw=true,},
+			},
+			orbs={
+			
+			},
+			bosses={
+				{name="Kolmisilmä (Three-Eye)",x=3400,y=13040},
+				{name="Ylialkemisti (High alchemist)",x=-4705,y=820,pw=true,no_ngp=true},
+				{name="Sauvojen tuntija (connoisseur of wands/Bridge boss)",x=9788,y=-874,no_ngp=true},
+				{name="Kolmisilmän Koipi (Three-Eye's legs/Pyramid boss)",x=4351,y=897,no_ngp=true},
+				{name="Suomuhauki (Dragon)",x=2333,y=7380,pw=true,no_ngp=true},
+				{name="Veska, Molari, Mokke, Seula (Gate guardians)",x=2727,y=11575,pw=true,no_ngp=true},
+				{name="Mestarien mestari (Master of masters/Wizard)",x=12308,y=15159,pw=true,no_ngp=true},
+				{name="Kolmisilmän silmä (Three-Eye's eye/Mecha Kolmi)",x=13856,y=11040,pw=true,no_ngp=true},
+				{name="Limatoukka (Slime maggot/Tiny)",x=14682,y=16170},
+				{name="Syväolento (Leviathan)",x=-13982,y=9779},
+				{name="Unohdettu (The Forgotten)",x=-11288,y=13108,pw=true,no_ngp=true},
+				{name="Kolmisilmän sydän (Three-Eye's heart/Meat boss)",x=6672,y=8476,pw=true,no_ngp=true},
+				{name="Tapion vasalli (Tapio's vassal/Deer boss)",x=-13767,y=171},
+				{name="Kivi (Rock)",x=7387,y=-5046},
+			},
+			
+		}
+		
+		if newgamepluscount=="0" then
+			hardcodelocations.orbs={
+				{name="Orb 0 (mountain)",x=781,y=-1073},
+				{name="Orb 1 (pyramid)",x=9986,y=-1167},
+				{name="Orb 2 (frozen vault)",x=-9985,y=2945},
+				{name="Orb 3 (lava lake)",x=3474,y=1906},
+				{name="Orb 4 (sandcave)",x=9984,y=2947},
+				{name="Orb 5 (magical temple)",x=-4353,y=3960},
+				{name="Orb 6 (lukki lair)",x=-3840,y=10115},
+				{name="Orb 7 (wand connoisseur)",x=4351,y=897},
+				{name="Orb 8 (hell)",x=-256,y=16257},
+				{name="Orb 9 (snowy chasm)",x=-8961,y=14721},
+				{name="Orb 10 (wizard's den)",x=10495,y=16256},
+			}
+			
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 1",x=-573,y=1396,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 2",x=-573,y=2932,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 3",x=-573,y=4980,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 4",x=-573,y=6516,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 5",x=-573,y=8564,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 6",x=-573,y=10612,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 7",x=2019,y=13169,pw=true}
+			
+		else --todo: make orb detection work with NG+
+			hardcodelocations.orbs={
+				{name="Orb 0 (mountain)",x=781,y=-1073},
+				{name="Orb 1 (pyramid)",x=9986,y=-1167},
+			}
+			
+			
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 1",x=-573,y=1396,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 2",x=-573,y=2932,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 3",x=-573,y=6516,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 4",x=-573,y=10612,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 5",x=2019,y=13169,pw=true}
+		end
+		hardcodelocations.saved=menudata.teleportoptions.savedlocations
+		
+		
+		local pos_x, pos_y = EntityGetTransform( player )
+		GuiText(sandbox_mode_ui,width/2,55,string.format("current pos: x=%+i y=%+i (PW %+i)",pos_x,pos_y,check_parallel_pos(pos_x)) )
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-25,65,"-1 PW") then
+			EntitySetTransform(player,pos_x-SIZE_PW,pos_y)
+		end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+25,65,"+1 PW") then
+			EntitySetTransform(player,pos_x+SIZE_PW,pos_y)
+		end
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+150,55,"save position" ) then
+			local t=menudata.teleportoptions.savedlocations
+			local y,mo,d,h,m,s = GameGetDateAndTimeLocal()
+			local mt={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",}
+			t[#t+1]={x=pos_x,y=pos_y,name=string.format("(%+i(%+i),%+i)@%i-%s-%i, %02i:%02i:%02i",pos_x,check_parallel_pos(pos_x),pos_y,d,mt[mo],y,h,m,s) }
+			local savestr=""
+			for i=1,#t do
+				savestr=savestr..serialtable(t[i]).."\x1F"
+			end
+			GlobalsSetValue("sandboxmode_saved_tp_locations",savestr)
+		end
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+150,65,string.format("go to last (%+i (PW %+i),%+i)",menudata.teleportoptions.prevx,check_parallel_pos(menudata.teleportoptions.prevx),menudata.teleportoptions.prevy) ) then
+			EntitySetTransform(player,menudata.teleportoptions.prevx,menudata.teleportoptions.prevy)
+			menudata.teleportoptions.prevx=pos_x
+			menudata.teleportoptions.prevy=pos_y
+		end
+		
+		for i=1,#cats do
+			local cat=cats[i]
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+(i-(#cats/2) )*50,75,cat==menudata.teleportoptions.selectedcat and ("["..cat.."]") or cat) then
+				menudata.teleportoptions.selectedcat=cat
+			end
+		end
+		
+		if menudata.teleportoptions.selectedcat then
+			local n=0
+			for i=1,#hardcodelocations[menudata.teleportoptions.selectedcat] do
+				local loc=hardcodelocations[menudata.teleportoptions.selectedcat][i]
+				if loc.no_ngp and newgamepluscount~="0" then
+				else
+					n=n+1
+					local lc,rc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2,90+n*10,loc.name)
+					if lc then
+						menudata.teleportoptions.prevx=pos_x
+						menudata.teleportoptions.prevy=pos_y
+						if loc.pw then
+							EntitySetTransform(player,(loc.x)+SIZE_PW*check_parallel_pos(pos_x) ,loc.y)
+						else
+							EntitySetTransform(player,loc.x,loc.y)
+						end
+					elseif rc then --right click to remove a custom location
+						for i=1,#menudata.teleportoptions.savedlocations do
+							if loc.name==menudata.teleportoptions.savedlocations.name then
+								table.remove(menudata.teleportoptions.savedlocations,i)
+								local savestr=""
+								for i=1,#t do
+									savestr=savestr..serialtable(t[i]).."\x1F"
+								end
+								GlobalsSetValue("sandboxmode_saved_tp_locations",savestr)
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+		
+		
+	--elseif menudata.active_menu=="extra" then
 		
 	end
 	
 end
 
+newgamepluscount=SessionNumbersGetValue("NEW_GAME_PLUS_COUNT") or "0"
 player=EntityGetWithTag("player_unit")[1] or EntityGetWithTag("polymorphed_player")[1]
 
 GuiStartFrame(sandbox_mode_ui)

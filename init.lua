@@ -6,6 +6,8 @@ function OnModPreInit()
 end
 
 function OnModInit()
+	
+	dofile("mods/sandbox_mode/files/start_pixel_scene/append.lua")
 	--print("Mod - OnModInit()") -- After that this is called for all mods
 end
 

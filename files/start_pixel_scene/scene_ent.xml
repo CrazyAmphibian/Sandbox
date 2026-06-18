@@ -1,0 +1,12 @@
+<Entity>
+	<LifetimeComponent
+		lifetime="2"
+		>
+	</LifetimeComponent>
+	<LuaComponent
+	script_source_file="mods/sandbox_mode/files/start_pixel_scene/load_scene.lua"
+	remove_after_executed="1"
+	execute_every_n_frame="1"
+	>
+	</LuaComponent>
+</Entity>
