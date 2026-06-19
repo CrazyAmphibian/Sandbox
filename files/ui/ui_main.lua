@@ -271,14 +271,16 @@ if sandbox_ui_open then
 			local wandent=get_held_wand(player)
 			if wandent then
 				local pos_x,pos_y=EntityGetTransform(player)
-				ents=EntityGetInRadiusWithTag(pos_x,pos_y,8,"card_action")
+				ents=EntityGetInRadiusWithTag(pos_x,pos_y,10,"card_action")
 				for i=1,#ents do
 					local e=ents[i]
-					local spc=EntityGetFirstComponentIncludingDisabled(e,"ItemActionComponent")
-					if spc then
-						local spid=ComponentGetValue2(spc,"action_id")
-						AddGunActionPermanent(wandent,spid)
-						EntityKill(e)
+					if EntityGetRootEntity(e)==e then
+						local spc=EntityGetFirstComponentIncludingDisabled(e,"ItemActionComponent")
+						if spc then
+							local spid=ComponentGetValue2(spc,"action_id")
+							AddGunActionPermanent(wandent,spid)
+							EntityKill(e)
+						end
 					end
 				end
 			end
