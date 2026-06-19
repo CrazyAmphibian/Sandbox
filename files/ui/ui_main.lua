@@ -8,7 +8,42 @@ dofile_once("data/scripts/gun/gun_actions.lua")
 dofile_once("data/scripts/perks/perk.lua")
 dofile_once( "data/scripts/perks/perk_list.lua" )
 
+--wand spawning
+dofile_once("data/scripts/gun/procedural/gun_procedural.lua")
+
 dofile_once("mods/sandbox_mode/files/tableserial.lua")
+
+function get_held_wand(entity) --thanks graham
+	local inv2comp = EntityGetFirstComponentIncludingDisabled(player, "Inventory2Component")
+	if inv2comp then
+        local activeitem = ComponentGetValue2(inv2comp, "mActiveItem")
+		EntityHasTag(activeitem, "wand")
+		return activeitem
+    end
+	return nil
+end
+
+function vertial_incrementation_overlays(x,y,value,inc1,inc2,inc3,min,max)
+	local _=value
+	
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-10,"+") then _=value+inc1 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-20,"++") then _=value+inc2 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-30,"+++") then _=value+inc3 end
+	
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+10,"-") then _=value-inc1 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+20,"--") then _=value-inc2 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+30,"---") then _=value-inc3 end
+	
+	if min then
+		_=math.max(_,min)
+	end
+	if max then
+		_=math.min(_,max)
+	end
+	
+	return _
+end
+
 
 function should_spell_be_shown(spelldata)
 	if menudata.spelloptions.hidenotunlocked and spelldata.spawn_requires_flag and (not HasFlagPersistent(spelldata.spawn_requires_flag)) then return false end
@@ -100,9 +135,10 @@ if not sandbox_mode_ui then
 		
 		perkoptions={show_hm=true,show_nothm=true,show_oneoff=true,show_notoneoff=true},
 		
-		potionoptions={show_liquid=true,show_gas=true,show_sand=true,show_solids=true,show_all=false,targetmatcount=1000,spawnitem="potion"},
+		potionoptions={show_liquid=true,show_gas=true,show_sand=true,show_solids=true,show_static=false,show_fx=false,targetmatcount=1000,spawnitem="potion",page=0},
+		
+		wandoptions={shuffle=false,capacity=3,mana=100,recharge=50,reload=30,fire=15,cast=1,spread=0}
 	}
-	ticks=0
 	svd=GlobalsGetValue("sandboxmode_saved_tp_locations")
 	--print(svd)
 	local tt=menudata.teleportoptions.savedlocations
@@ -113,22 +149,21 @@ if not sandbox_mode_ui then
 	
 	
 end
-ticks=ticks+1
+
 local width,height=GuiGetScreenDimensions(sandbox_mode_ui)
 local gui_id=0
 function gui_next_id() gui_id=gui_id+1 return gui_id end
 
 GuiOptionsAdd(sandbox_mode_ui,GUI_OPTION.Align_HorizontalCenter)
 
-local spinnytable={"|","/","-","\\"}
-local c=spinnytable[( math.floor(ticks/15)%#spinnytable)+1]
-if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,5,sandbox_ui_open and c.." SANDBOX "..c or "SANDBOX") then
+
+if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,5,sandbox_ui_open and "[SANDBOX]" or "SANDBOX") then
 	sandbox_ui_open=not sandbox_ui_open
 end
 
 if sandbox_ui_open then
 	
-	local menus={"spells","perks","potions","teleport"}
+	local menus={"spells","wands","perks","potions","teleport"}
 	for i=1,#menus do
 		local m=menus[i]
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-50*((#menus+1)/2-i),40,menudata.active_menu==m and "["..m.."]" or m) then menudata.active_menu=m end
@@ -185,7 +220,125 @@ if sandbox_ui_open then
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-30,65,"<-") then menudata.spelloptions.page=math.max(menudata.spelloptions.page-1,0) end
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+30,65,"->") then menudata.spelloptions.page=math.min(menudata.spelloptions.page+1,math.ceil(n/180)-1) end
 		
+		
+	elseif menudata.active_menu=="wands" then
+		--wandoptions={shuffle=false,capacity=3,mana=100,recharge=50,reload=30,fire=15,cast=1,spread=0}
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-245,85,menudata.wandoptions.shuffle and "shuffle [X]" or "shuffle [ ]") then menudata.wandoptions.shuffle=not menudata.wandoptions.shuffle end
+		
+		GuiText(sandbox_mode_ui,width/2-175,85,"spells/cast "..menudata.wandoptions.cast)
+		menudata.wandoptions.cast=vertial_incrementation_overlays(width/2-175,85,menudata.wandoptions.cast,1,2,5,1)
+		
+		GuiText(sandbox_mode_ui,width/2-105,85, string.format("cast delay %.2f",menudata.wandoptions.fire/60) )
+		menudata.wandoptions.fire=vertial_incrementation_overlays(width/2-105,85,menudata.wandoptions.fire,1,5,15)
+		
+		GuiText(sandbox_mode_ui,width/2-35,85, string.format("recharge %.2f",menudata.wandoptions.reload/60))
+		menudata.wandoptions.reload=vertial_incrementation_overlays(width/2-35,85,menudata.wandoptions.reload,1,5,15)
+		
+		GuiText(sandbox_mode_ui,width/2+35,85,"max mana "..menudata.wandoptions.mana)
+		menudata.wandoptions.mana=vertial_incrementation_overlays(width/2+35,85,menudata.wandoptions.mana,1,10,100,1)
+		
+		GuiText(sandbox_mode_ui,width/2+105,85,"mana charge "..menudata.wandoptions.recharge)
+		menudata.wandoptions.recharge=vertial_incrementation_overlays(width/2+105,85,menudata.wandoptions.recharge,1,5,25,0)
+		
+		GuiText(sandbox_mode_ui,width/2+175,85,"capacity "..menudata.wandoptions.capacity)
+		menudata.wandoptions.capacity=vertial_incrementation_overlays(width/2+175,85,menudata.wandoptions.capacity,1,2,5,1)
+		
+		GuiText(sandbox_mode_ui,width/2+245,85,"spread "..menudata.wandoptions.spread)
+		menudata.wandoptions.spread=vertial_incrementation_overlays(width/2+245,85,menudata.wandoptions.spread,.1,1,5,0)
+		
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-150,135, "[clear held wand alwayscasts]") then 
+			local wandent=get_held_wand(player)
+			if wandent then
+				local spells=EntityGetAllChildren(wandent,"card_action")
+				for i=1,#spells do
+					local s=spells[i]
+					local item_component=EntityGetFirstComponentIncludingDisabled(s,"ItemComponent")
+					if ComponentGetValue2( item_component, "permanently_attached") then
+						EntityRemoveFromParent(s)
+						EntityKill(S)
+						
+						local ability_comp = EntityGetFirstComponentIncludingDisabled( wandent, "AbilityComponent" )
+						if ability_comp then
+							ComponentObjectSetValue2( ability_comp, "gun_config", "deck_capacity", ComponentObjectGetValue2( ability_comp, "gun_config", "deck_capacity" )-1 )
+						end
+					end
+				end
+			end
+		end
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-150,150, "[add nearby spells to held wand alwayscast]") then 
+			local wandent=get_held_wand(player)
+			if wandent then
+				local pos_x,pos_y=EntityGetTransform(player)
+				ents=EntityGetInRadiusWithTag(pos_x,pos_y,8,"card_action")
+				for i=1,#ents do
+					local e=ents[i]
+					local spc=EntityGetFirstComponentIncludingDisabled(e,"ItemActionComponent")
+					if spc then
+						local spid=ComponentGetValue2(spc,"action_id")
+						AddGunActionPermanent(wandent,spid)
+						EntityKill(e)
+					end
+				end
+			end
+		end
+		  
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+150,135, "[copy held wand stats]") then 
+			local wandent=get_held_wand(player)
+			if wandent then
+				local ability_comp = EntityGetFirstComponentIncludingDisabled( wandent, "AbilityComponent" )
+				
+				menudata.wandoptions.cast=ComponentObjectGetValue2( ability_comp, "gun_config", "actions_per_round")
+				menudata.wandoptions.reload=ComponentObjectGetValue2( ability_comp, "gun_config", "reload_time")
+				menudata.wandoptions.capacity=ComponentObjectGetValue2( ability_comp, "gun_config", "deck_capacity")
+				menudata.wandoptions.shuffle=ComponentObjectGetValue2( ability_comp, "gun_config", "shuffle_deck_when_empty")==1
+				menudata.wandoptions.fire=ComponentObjectGetValue2( ability_comp, "gunaction_config", "fire_rate_wait")
+				menudata.wandoptions.spread=ComponentObjectGetValue2( ability_comp, "gunaction_config", "spread_degrees")
+				menudata.wandoptions.recharge=ComponentGetValue2( ability_comp, "mana_charge_speed")
+				menudata.wandoptions.mana=ComponentGetValue2( ability_comp, "mana_max")
+			end
+		end
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+150,150, "[spawn new wand]") and player then 
+			local x, y = EntityGetTransform(player)
+			local wandent=EntityLoad("mods/sandbox_mode/files/blank_wand.xml",x,y)
+			
+			local ability_comp = EntityGetFirstComponent( wandent, "AbilityComponent" )
+			ComponentObjectSetValue2( ability_comp, "gun_config", "actions_per_round", menudata.wandoptions.cast )
+			ComponentObjectSetValue2( ability_comp, "gun_config", "reload_time", menudata.wandoptions.reload )
+			ComponentObjectSetValue2( ability_comp, "gun_config", "deck_capacity", menudata.wandoptions.capacity )
+			ComponentObjectSetValue2( ability_comp, "gun_config", "shuffle_deck_when_empty", menudata.wandoptions.shuffle)
+			ComponentObjectSetValue2( ability_comp, "gunaction_config", "fire_rate_wait", menudata.wandoptions.fire )
+			ComponentObjectSetValue2( ability_comp, "gunaction_config", "spread_degrees", menudata.wandoptions.spread )
+			ComponentObjectSetValue2( ability_comp, "gunaction_config", "speed_multiplier", 1.0 )
+			ComponentSetValue2( ability_comp, "mana_charge_speed", menudata.wandoptions.recharge)
+			ComponentSetValue2( ability_comp, "mana_max", menudata.wandoptions.mana)
+			ComponentSetValue2( ability_comp, "mana", menudata.wandoptions.mana)
+			ComponentSetValue2( ability_comp, "gun_level", 1 )
 
+			ComponentSetValue2( ability_comp, "item_recoil_recovery_speed", 15.0 )
+			
+			local w=wands[math.random(1,#wands)]
+			SetWandSprite( wandent, ability_comp, w.file, w.grip_x, w.grip_y, (w.tip_x - w.grip_x), (w.tip_y - w.grip_y) )
+		end
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+150,165, "[apply to held wand]") then 
+			local wandent=get_held_wand(player)
+			if wandent then
+				local ability_comp = EntityGetFirstComponentIncludingDisabled( wandent, "AbilityComponent" )
+				ComponentObjectSetValue2( ability_comp, "gun_config", "actions_per_round", menudata.wandoptions.cast )
+				ComponentObjectSetValue2( ability_comp, "gun_config", "reload_time", menudata.wandoptions.reload )
+				ComponentObjectSetValue2( ability_comp, "gun_config", "deck_capacity", menudata.wandoptions.capacity )
+				ComponentObjectSetValue2( ability_comp, "gun_config", "shuffle_deck_when_empty", menudata.wandoptions.shuffle )
+				ComponentObjectSetValue2( ability_comp, "gunaction_config", "fire_rate_wait", menudata.wandoptions.fire )
+				ComponentObjectSetValue2( ability_comp, "gunaction_config", "spread_degrees", menudata.wandoptions.spread )
+				ComponentSetValue2( ability_comp, "mana_charge_speed", menudata.wandoptions.recharge)
+				ComponentSetValue2( ability_comp, "mana_max", menudata.wandoptions.mana)
+				ComponentSetValue2( ability_comp, "mana", menudata.wandoptions.mana)
+			end
+		end
+		
 	elseif menudata.active_menu=="perks" then
 		
 		
@@ -208,7 +361,116 @@ if sandbox_ui_open then
 		
 		
 	elseif menudata.active_menu=="potions" then
+		--potionoptions={show_liquid=true,show_gas=true,show_sand=true,show_solids=true,show_static=false,show_fx=false,targetmatcount=1000,spawnitem="potion",page=0}
+		--option selection
+		lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2-150,55,"Liquids [".. (menudata.potionoptions.show_liquid and "X]" or " ]"))
+		if lc then menudata.potionoptions.show_liquid=not menudata.potionoptions.show_liquid menudata.potionoptions.page=0 end
 		
+		lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2-150,65,"Sands [".. (menudata.potionoptions.show_sand and "X]" or " ]"))
+		if lc then menudata.potionoptions.show_sand=not menudata.potionoptions.show_sand menudata.potionoptions.page=0 end
+		
+		lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2-75,55,"Gasses [".. (menudata.potionoptions.show_gas and "X]" or " ]"))
+		if lc then menudata.potionoptions.show_gas=not menudata.potionoptions.show_gas menudata.potionoptions.page=0 end
+		
+		lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2-75,65,"Solids [".. (menudata.potionoptions.show_solids and "X]" or " ]"))
+		if lc then menudata.potionoptions.show_solids=not menudata.potionoptions.show_solids menudata.potionoptions.page=0 end
+		
+		lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2-250,65,"Show static (advanced) [".. (menudata.potionoptions.show_static and "X]" or " ]"))
+		if lc then menudata.potionoptions.show_static=not menudata.potionoptions.show_static menudata.potionoptions.page=0 end
+		
+		lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2-250,55,"Show FX (advanced) [".. (menudata.potionoptions.show_fx and "X]" or " ]"))
+		if lc then menudata.potionoptions.show_fx=not menudata.potionoptions.show_fx menudata.potionoptions.page=0 end
+		--end options
+		
+		--spawning selectors
+		local itemtypes={
+			{"potion","data/entities/items/pickup/potion_empty.xml"},
+			{"pouch","data/entities/items/pickup/powder_stash.xml"},
+		}
+		local ITEM_SPAWN_PATH=nil
+		for i=1,#itemtypes do
+			local item=itemtypes[i]
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+20+50*i,65,item[1] == menudata.potionoptions.spawnitem and item[1].."[X]" or item[1].."[ ]" ) then
+				menudata.potionoptions.spawnitem=item[1]
+			end
+			if item[1] == menudata.potionoptions.spawnitem then ITEM_SPAWN_PATH=item[2] end
+		end
+		
+		GuiText(sandbox_mode_ui,width/2+150,55, menudata.potionoptions.targetmatcount.."px")
+		local countselectors={1,10,100,1000}
+		local ofst=0
+		for i=1,#countselectors do
+			local c=countselectors[i]
+			ofst=ofst+#tostring(c)+2
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+160+5*ofst,55, "+"..c ) then
+				menudata.potionoptions.targetmatcount=menudata.potionoptions.targetmatcount+c
+			end
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+140-5*ofst,55, "-"..c ) then
+				menudata.potionoptions.targetmatcount=math.max(0,menudata.potionoptions.targetmatcount-c)
+			end
+			--menudata.potionoptions.targetmatcount
+		end
+		
+		--end spawn selectors
+		
+		local matids={}
+		if menudata.potionoptions.show_liquid or menudata.potionoptions.show_all then
+			local t=CellFactory_GetAllLiquids(menudata.potionoptions.show_static,menudata.potionoptions.show_fx)
+			for i=1,#t do
+				matids[#matids+1]=t[i]
+			end
+		end
+		if menudata.potionoptions.show_sand or menudata.potionoptions.show_all then
+			local t=CellFactory_GetAllSands(menudata.potionoptions.show_static,menudata.potionoptions.show_fx)
+			for i=1,#t do
+				matids[#matids+1]=t[i]
+			end
+		end
+		if menudata.potionoptions.show_gas or menudata.potionoptions.show_all then
+			local t=CellFactory_GetAllGases(menudata.potionoptions.show_static,menudata.potionoptions.show_fx)
+			for i=1,#t do
+				matids[#matids+1]=t[i]
+			end
+		end
+		if menudata.potionoptions.show_solids or menudata.potionoptions.show_all then
+			local t=CellFactory_GetAllSolids(menudata.potionoptions.show_static,menudata.potionoptions.show_fx)
+			for i=1,#t do
+				matids[#matids+1]=t[i]
+			end
+		end
+		if menudata.potionoptions.show_fx then
+			local t=CellFactory_GetAllFires(menudata.potionoptions.show_static,menudata.potionoptions.show_fx)
+			for i=1,#t do
+				matids[#matids+1]=t[i]
+			end
+		end
+		local cols,rows=4,13
+		local i=0
+		for n=1+menudata.potionoptions.page*cols*rows,#matids do
+			local mat=matids[n]
+			i=i+1
+			local lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2+ 160*((i-1)%cols -((cols-1)/2)),90+20*math.floor((i-1)/cols),GameTextGetTranslatedOrNot(CellFactory_GetUIName(CellFactory_GetType(mat))))
+			lc=lc or GuiButton(sandbox_mode_ui,gui_next_id(),width/2+ 160*((i-1)%cols -((cols-1)/2)),97+20*math.floor((i-1)/cols),"[\n"..mat.."]")
+			
+			if lc and player and ITEM_SPAWN_PATH then --spawn object
+				local x, y = EntityGetTransform(player)
+				local ent=EntityLoad(ITEM_SPAWN_PATH,x,y)
+				--remove materials if they exist
+				local comp=EntityGetFirstComponentIncludingDisabled(ent, "MaterialInventoryComponent")
+				local cv=ComponentGetValue2(comp,"count_per_material_type")
+				for i=1, #cv do
+					AddMaterialInventoryMaterial(ent, CellFactory_GetName(i-1) ,0) --remove however much material is in there.
+				end
+				AddMaterialInventoryMaterial(ent, mat ,menudata.potionoptions.targetmatcount)
+			end
+			
+			if i>=cols*rows then break end
+		end
+		
+		GuiText(sandbox_mode_ui,width/2,65,string.format("page %i/%i",menudata.potionoptions.page+1,math.ceil(#matids/cols/rows) ) )
+		GuiText(sandbox_mode_ui,width/2,55,string.format("%i materials",#matids) )
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-30,65,"<-") then menudata.potionoptions.page=math.max(menudata.potionoptions.page-1,0) end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+30,65,"->") then menudata.potionoptions.page=math.min(menudata.potionoptions.page+1,math.ceil(#matids/cols/rows)-1) end
 		
 		
 	elseif menudata.active_menu=="teleport" and player then
