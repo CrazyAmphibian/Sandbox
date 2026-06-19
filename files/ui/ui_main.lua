@@ -44,6 +44,28 @@ function vertial_incrementation_overlays(x,y,value,inc1,inc2,inc3,min,max)
 	return _
 end
 
+function vertial_incrementation4_overlays(x,y,value,inc1,inc2,inc3,inc4,min,max)
+	local _=value
+	
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-10,"+") then _=value+inc1 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-20,"++") then _=value+inc2 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-30,"+++") then _=value+inc3 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y-40,"+++++") then _=value+inc4 end
+	
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+10,"-") then _=value-inc1 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+20,"--") then _=value-inc2 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+30,"---") then _=value-inc3 end
+	if GuiButton(sandbox_mode_ui,gui_next_id(),x,y+40,"----") then _=value-inc4 end
+	
+	if min then
+		_=math.max(_,min)
+	end
+	if max then
+		_=math.min(_,max)
+	end
+	
+	return _
+end
 
 function should_spell_be_shown(spelldata)
 	if menudata.spelloptions.hidenotunlocked and spelldata.spawn_requires_flag and (not HasFlagPersistent(spelldata.spawn_requires_flag)) then return false end
@@ -90,6 +112,7 @@ function display_spell(spelldata,x,y)
 		GuiZSetForNextWidget(sandbox_mode_ui,-1)
 		GuiText(sandbox_mode_ui,x,y-10,GameTextGetTranslatedOrNot(spelldata.name) )
 		GuiZSetForNextWidget(sandbox_mode_ui,-1)
+		GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,1)
 		GuiText(sandbox_mode_ui,x,y+16,spelldata.id)
 	end
 	
@@ -120,6 +143,7 @@ function display_perk(perk,x,y)
 		GuiZSetForNextWidget(sandbox_mode_ui,-1)
 		GuiText(sandbox_mode_ui,x,y-10,GameTextGetTranslatedOrNot(perk.ui_name) )
 		GuiZSetForNextWidget(sandbox_mode_ui,-1)
+		GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,1)
 		GuiText(sandbox_mode_ui,x,y+16,perk.id)
 	end
 end
@@ -157,7 +181,7 @@ function gui_next_id() gui_id=gui_id+1 return gui_id end
 GuiOptionsAdd(sandbox_mode_ui,GUI_OPTION.Align_HorizontalCenter)
 
 
-if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,5,sandbox_ui_open and "[SANDBOX]" or "SANDBOX") then
+if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,5,sandbox_ui_open and "SANDBOX" or "SANDBOX") then
 	sandbox_ui_open=not sandbox_ui_open
 end
 
@@ -452,7 +476,8 @@ if sandbox_ui_open then
 			local mat=matids[n]
 			i=i+1
 			local lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2+ 160*((i-1)%cols -((cols-1)/2)),90+20*math.floor((i-1)/cols),GameTextGetTranslatedOrNot(CellFactory_GetUIName(CellFactory_GetType(mat))))
-			lc=lc or GuiButton(sandbox_mode_ui,gui_next_id(),width/2+ 160*((i-1)%cols -((cols-1)/2)),97+20*math.floor((i-1)/cols),"[\n"..mat.."]")
+			GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,1)
+			lc=lc or GuiButton(sandbox_mode_ui,gui_next_id(),width/2+ 160*((i-1)%cols -((cols-1)/2)),97+20*math.floor((i-1)/cols),"["..mat.."]")
 			
 			if lc and player and ITEM_SPAWN_PATH then --spawn object
 				local x, y = EntityGetTransform(player)
@@ -485,11 +510,11 @@ if sandbox_ui_open then
 				{name="Spawn",x=227,y=-79,pw=true},
 				{name="Nullifying altar",x=14000,y=7552,pw=true,no_ngp=true},
 				{name="Race track",x=3390,y=2472,pw=true,no_ngp=true},
-				{name="Gold (East)",x=1590,y=-3340,pw=true,no_ngp=true},
-				{name="Gold (West)",x=-1470,y=16600,pw=true},
+				{name="Gold (East)",x=15000,y=-3340,pw=true,no_ngp=true},
+				{name="Gold (West)",x=-14000,y=16600,pw=true},
 				{name="The Tower (start)",x=9739,y=9197,pw=true,no_ngp=true},
 				{name="The Tower (end)",x=9985,y=4373,pw=true,no_ngp=true},
-				{name="Gourd cave",x=16100,y=-6344,},
+				{name="Gourd cave",x=-16100,y=-6344,},
 				{name="Rainbow trail",x=-14000,y=-2843,},
 				{name="Portal travel room",x=3828,y=7539,pw=true},
 				{name="Experimental wand (machine gun)",x=16088,y=10004,pw=true,no_ngp=true},
@@ -520,8 +545,8 @@ if sandbox_ui_open then
 			bosses={
 				{name="Kolmisilmä (Three-Eye)",x=3400,y=13040},
 				{name="Ylialkemisti (High alchemist)",x=-4705,y=820,pw=true,no_ngp=true},
-				{name="Sauvojen tuntija (connoisseur of wands/Bridge boss)",x=9788,y=-874,no_ngp=true},
-				{name="Kolmisilmän Koipi (Three-Eye's legs/Pyramid boss)",x=4351,y=897,no_ngp=true},
+				{name="Sauvojen tuntija (connoisseur of wands/Bridge boss)",x=4351,y=897,no_ngp=true},
+				{name="Kolmisilmän Koipi (Three-Eye's legs/Pyramid boss)",x=9788,y=-874,no_ngp=true},
 				{name="Suomuhauki (Dragon)",x=2333,y=7380,pw=true,no_ngp=true},
 				{name="Veska, Molari, Mokke, Seula (Gate guardians)",x=2727,y=11575,pw=true,no_ngp=true},
 				{name="Mestarien mestari (Master of masters/Wizard)",x=12308,y=15159,pw=true,no_ngp=true},
@@ -551,13 +576,13 @@ if sandbox_ui_open then
 				{name="Orb 10 (wizard's den)",x=10495,y=16256},
 			}
 			
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 1",x=-573,y=1396,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 2",x=-573,y=2932,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 3",x=-573,y=4980,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 4",x=-573,y=6516,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 5",x=-573,y=8564,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 6",x=-573,y=10612,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 7",x=2019,y=13169,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 1",x=-573,y=1386,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 2",x=-573,y=2922,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 3",x=-573,y=4970,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 4",x=-573,y=6506,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 5",x=-573,y=8554,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 6",x=-573,y=10602,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 7",x=2019,y=13159,pw=true}
 			
 		else --todo: make orb detection work with NG+
 			hardcodelocations.orbs={
@@ -566,11 +591,11 @@ if sandbox_ui_open then
 			}
 			
 			
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 1",x=-573,y=1396,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 2",x=-573,y=2932,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 3",x=-573,y=6516,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 4",x=-573,y=10612,pw=true}
-			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 5",x=2019,y=13169,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 1",x=-573,y=1386,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 2",x=-573,y=2922,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 3",x=-573,y=6506,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 4",x=-573,y=10602,pw=true}
+			hardcodelocations.misc[#hardcodelocations.misc+1]={name="Holy mountain 5",x=2019,y=13159,pw=true}
 		end
 		hardcodelocations.saved=menudata.teleportoptions.savedlocations
 		
@@ -602,6 +627,23 @@ if sandbox_ui_open then
 			menudata.teleportoptions.prevx=pos_x
 			menudata.teleportoptions.prevy=pos_y
 		end
+		
+		
+		GuiText(sandbox_mode_ui,width/2-275,90,string.format("x:%+i (PW %+i)",menudata.teleportoptions.storedx,check_parallel_pos(menudata.teleportoptions.storedx) ) )
+		menudata.teleportoptions.storedx=vertial_incrementation4_overlays(width/2-275,90,menudata.teleportoptions.storedx,1,10,100,1000)
+		
+		GuiText(sandbox_mode_ui,width/2-200,90,string.format("y:%+i",menudata.teleportoptions.storedy ) )
+		menudata.teleportoptions.storedy=vertial_incrementation4_overlays(width/2-200,90,menudata.teleportoptions.storedy,1,10,100,1000)
+		
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-237,155,"[set to current pos]" ) then
+			menudata.teleportoptions.storedx,menudata.teleportoptions.storedy=EntityGetTransform(player)
+		end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-237,170,"[teleport player to]" ) then
+			EntitySetTransform(player,menudata.teleportoptions.storedx,menudata.teleportoptions.storedy)
+			menudata.teleportoptions.prevx=pos_x
+			menudata.teleportoptions.prevy=pos_y
+		end
+		
 		
 		for i=1,#cats do
 			local cat=cats[i]
