@@ -276,7 +276,7 @@ if sandbox_ui_open then
 		menudata.wandoptions.capacity=vertial_incrementation_overlays(width/2+175,85,menudata.wandoptions.capacity,1,2,5,1)
 		
 		GuiText(sandbox_mode_ui,width/2+245,85,"spread "..menudata.wandoptions.spread)
-		menudata.wandoptions.spread=vertial_incrementation_overlays(width/2+245,85,menudata.wandoptions.spread,.1,1,5,0)
+		menudata.wandoptions.spread=vertial_incrementation_overlays(width/2+245,85,menudata.wandoptions.spread,.1,1,5)
 		
 		
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-150,135, "[clear held wand alwayscasts]") then 
@@ -424,7 +424,7 @@ if sandbox_ui_open then
 		local ITEM_SPAWN_PATH=nil
 		for i=1,#itemtypes do
 			local item=itemtypes[i]
-			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+20+50*i,65,item[1] == menudata.potionoptions.spawnitem and item[1].."[X]" or item[1].."[ ]" ) then
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+10+55*i,65,item[1] == menudata.potionoptions.spawnitem and item[1].."[X]" or item[1].."[ ]" ) then
 				menudata.potionoptions.spawnitem=item[1]
 			end
 			if item[1] == menudata.potionoptions.spawnitem then ITEM_SPAWN_PATH=item[2] end
