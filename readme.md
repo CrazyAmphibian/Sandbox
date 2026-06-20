@@ -26,6 +26,7 @@ for **entities**, you will have to manually register each entity you want to be 
 dofile_once("mods/sandbox_mode/files/ui/entity_list.lua")
 add_entity_to_list("mods/my_mod/files/my_entity.xml","Cool Thing","item")
 ```
+if nothing else, you can append or modify `/files/ui/vanilla_ents.lua` during mod initialization.
 
 ### how do i add custom actions?
 the `misc` tab is your best bet for general purpose functions. this will require modifying the source file `/files/ui/ui_main.lua` using `ModTextFileSetContent` and `ModTextFileGetContent`.
