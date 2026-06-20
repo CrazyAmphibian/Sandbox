@@ -717,7 +717,7 @@ if sandbox_ui_open then
 		--entityoptions={category=nil,page=0},
 		for i=1,#ENTITY_CATEGORIES do
 			local cat=ENTITY_CATEGORIES[i]
-			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+75*(i-.5-#ENTITY_CATEGORIES/2),60, menudata.entityoptions.category==cat and ("["..cat.."]") or cat) then
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+60*(i-.5-#ENTITY_CATEGORIES/2),60, menudata.entityoptions.category==cat and ("["..cat.."]") or cat) then
 				menudata.entityoptions.category=cat
 				menudata.entityoptions.page=0
 			end
