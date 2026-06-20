@@ -1,3 +1,39 @@
+--props
+--add_entity_to_list("data/entities/animals/mimic_physics.xml","Hämis vase","props")
+
+
+
+
+--wands
+add_entity_to_list("data/entities/items/starting_wand.xml","starting wand","wands")
+add_entity_to_list("data/entities/items/starting_bomb_wand.xml","starting bomb wand","wands")
+add_entity_to_list("data/entities/items/wand_level_01.xml","Level 1 wand","wands")
+add_entity_to_list("data/entities/items/wand_level_01_better.xml","Level 1 wand (better)","wands")
+add_entity_to_list("data/entities/items/wand_level_02.xml","Level 2 wand","wands")
+add_entity_to_list("data/entities/items/wand_level_02_better.xml","Level 2 wand (better)","wands")
+add_entity_to_list("data/entities/items/wand_level_03.xml","Level 3 wand","wands")
+add_entity_to_list("data/entities/items/wand_level_03_better.xml","Level 3 wand (better)","wands")
+add_entity_to_list("data/entities/items/wand_level_04.xml","Level 4 wand","wands")
+add_entity_to_list("data/entities/items/wand_level_04_better.xml","Level 4 wand (better)","wands")
+add_entity_to_list("data/entities/items/wand_level_05.xml","Level 5 wand","wands")
+add_entity_to_list("data/entities/items/wand_level_05_better.xml","Level 5 wand (better)","wands")
+add_entity_to_list("data/entities/items/wand_level_06.xml","Level 6 wand","wands")
+add_entity_to_list("data/entities/items/wand_level_06_better.xml","Level 6 wand (better)","wands")
+add_entity_to_list("data/entities/items/wand_level_10.xml","Level 10 wand","wands")
+add_entity_to_list("data/entities/items/flute.xml","ocarina","wands")
+add_entity_to_list("data/entities/items/kantele.xml","kantele","wands")
+add_entity_to_list("data/entities/items/wand_kiekurakeppi.xml","kiekurakeppi","wands")
+add_entity_to_list("data/entities/items/wand_leukaluu.xml","leukaluu","wands")
+add_entity_to_list("data/entities/items/wand_ruusu.xml","ruusu","wands")
+add_entity_to_list("data/entities/items/wand_valtikka.xml","valtikka","wands")
+add_entity_to_list("data/entities/items/wand_varpuluuta.xml","varpuluuta","wands")
+add_entity_to_list("data/entities/items/wand_vasta.xml","vasta","wands")
+add_entity_to_list("data/entities/items/wand_vihta.xml","vihta","wands")
+add_entity_to_list("data/entities/items/wands/experimental/experimental_wand_1.xml","experimental wand (conditionals)","wands")
+add_entity_to_list("data/entities/items/wands/experimental/experimental_wand_2.xml","experimental wand (glimmers)","wands")
+add_entity_to_list("data/entities/items/wands/experimental/experimental_wand_3.xml","experimental wand (machine gun)","wands")
+add_entity_to_list("data/entities/items/wands/experimental/experimental_wand_4.xml","Saha","wands")
+
 
 --pickups
 add_entity_to_list("data/entities/items/pickup/heart.xml","heart","pickups")
@@ -62,6 +98,45 @@ add_entity_to_list("data/entities/items/pickup/runestones/runestone_lava.xml","r
 add_entity_to_list("data/entities/items/pickup/runestones/runestone_metal.xml","runestone of metal","items")
 add_entity_to_list("data/entities/items/pickup/runestones/runestone_null.xml","runestone of emptiness","items")
 
+add_entity_to_list("data/entities/items/pickup/potion_empty.xml","empty potion","items")
+add_entity_to_list("data/entities/items/pickup/potion.xml","potion","items")
+add_entity_to_list("data/entities/items/pickup/potion_starting.xml","starting potion","items")
+add_entity_to_list("data/entities/items/pickup/potion_aggressive.xml","alchemist Hiisi potion","items")
+add_entity_to_list("data/entities/items/pickup/jar.xml","jar","items")
+add_entity_to_list("data/entities/items/pickup/jar_of_urine.xml","jarate","items")
+add_entity_to_list("data/entities/items/pickup/powder_stash.xml","powder pouch","items")
+
+
+add_entity_to_list("data/entities/items/books/book_00.xml","Emerald Tablet - Volume I","items")
+add_entity_to_list("data/entities/items/books/book_01.xml","Emerald Tablet of Toth","items")
+add_entity_to_list("data/entities/items/books/book_02.xml","Emerald Tablet - Volume II","items")
+add_entity_to_list("data/entities/items/books/book_03.xml","Emerald Tablet - Volume III","items")
+add_entity_to_list("data/entities/items/books/book_04.xml","Emerald Tablet - Volume IV","items")
+add_entity_to_list("data/entities/items/books/book_05.xml","Emerald Tablet - Volume V","items")
+add_entity_to_list("data/entities/items/books/book_06.xml","Emerald Tablet - Volume VI","items")
+add_entity_to_list("data/entities/items/books/book_07.xml","Emerald Tablet - Volume VII","items")
+add_entity_to_list("data/entities/items/books/book_08.xml","Emerald Tablet - Volume VIII","items")
+add_entity_to_list("data/entities/items/books/book_09.xml","Emerald Tablet - Volume IX","items")
+add_entity_to_list("data/entities/items/books/book_10.xml","Emerald Tablet - Volume X","items")
+add_entity_to_list("data/entities/items/books/book_all_spells.xml","Map of Gnosis","items")
+add_entity_to_list("data/entities/items/books/book_barren.xml","Adept's Note","items")
+add_entity_to_list("data/entities/items/books/book_bunker.xml","Alchemist's Note","items")
+add_entity_to_list("data/entities/items/books/book_corpse.xml","Tabula Smaragdina","items")
+add_entity_to_list("data/entities/items/books/book_diamond.xml","Book of the Jewel","items")
+add_entity_to_list("data/entities/items/books/book_essences.xml","Tome of Essences","items")
+add_entity_to_list("data/entities/items/books/book_hint.xml","Book of Guidance","items")
+add_entity_to_list("data/entities/items/books/book_mestari.xml","A Cunning Contraption","items")
+add_entity_to_list("data/entities/items/books/book_moon.xml","Book of Celestial Bodies","items")
+add_entity_to_list("data/entities/items/books/book_music_a.xml","Alchemist's Notebook","items")
+add_entity_to_list("data/entities/items/books/book_music_b.xml","Research Notes","items")
+add_entity_to_list("data/entities/items/books/book_music_c.xml","Book of the key","items")
+add_entity_to_list("data/entities/items/books/book_robot.xml","Musings of an Adventurer","items")
+add_entity_to_list("data/entities/items/books/book_s_a.xml","Notes on Grand Alchemy (1)","items")
+add_entity_to_list("data/entities/items/books/book_s_b.xml","Notes on Grand Alchemy (2)","items")
+add_entity_to_list("data/entities/items/books/book_s_c.xml","Notes on Grand Alchemy (3)","items")
+add_entity_to_list("data/entities/items/books/book_s_d.xml","Notes on Grand Alchemy (4)","items")
+add_entity_to_list("data/entities/items/books/book_s_e.xml","Notes on Grand Alchemy (5)","items")
+add_entity_to_list("data/entities/items/books/book_tree.xml","Secretorum Hermetis","items")
 
 
 
@@ -226,9 +301,6 @@ add_entity_to_list("data/entities/animals/zombie_weak.xml","Heikkohurtta (Weak H
 
 
 
-
-
---add_entity_to_list("data/entities/animals/mimic_physics.xml","Hämis vase","props")
 
 
 
