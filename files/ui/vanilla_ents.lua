@@ -1,5 +1,5 @@
 --props
---add_entity_to_list("data/entities/animals/mimic_physics.xml","Hämis vase","props")
+--add_entity_to_list("data/entities/animals/mimic_physics.xml","Hämis vase","props") --turns out this is also in entities/props. oh well. i don't feel like adding props quite yet.
 
 
 
@@ -47,6 +47,9 @@ add_entity_to_list("data/entities/items/pickup/utility_box.xml","utility box","p
 add_entity_to_list("data/entities/items/pickup/chest_random.xml","treasure chest","pickups")
 add_entity_to_list("data/entities/items/pickup/chest_random_super.xml","great treasure chest","pickups")
 
+add_entity_to_list("data/entities/buildings/chest_light.xml","choral chest","pickups")
+add_entity_to_list("data/entities/buildings/chest_dark.xml","dark chest","pickups")
+
 add_entity_to_list("data/entities/items/pickup/essence_air.xml","essence of air","pickups")
 add_entity_to_list("data/entities/items/pickup/essence_fire.xml","essence of fire","pickups")
 add_entity_to_list("data/entities/items/pickup/essence_laser.xml","essence of earth","pickups")
@@ -65,6 +68,8 @@ add_entity_to_list("data/entities/items/pickup/waterstone.xml","vuoksikivi (wate
 add_entity_to_list("data/entities/items/pickup/stonestone.xml","tannerkivi (earth stone)","items")
 add_entity_to_list("data/entities/items/pickup/poopstone.xml","kakkakikkare (poop stone)","items")
 add_entity_to_list("data/entities/items/pickup/sun/sunseed.xml","auringonsiemen (sun seed)","items")
+
+add_entity_to_list("data/entities/animals/boss_alchemist/key.xml.xml","crystal key","items")
 
 add_entity_to_list("data/entities/items/pickup/broken_wand.xml","broken wand","items")
 
