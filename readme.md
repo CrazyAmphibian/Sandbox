@@ -10,6 +10,7 @@ In sandbox mode, the player is granted with the following:
 * the ability to spawn in certain entities
 * the ability to edit wand stats
 * the ability to spawn perks and spells
+* the ability to spawn in potions and pouches with specific materials
 * the ability to teleport to arbitrary locations, save locations for later, as well as some presets.
 * some other powers, like unlimited gold, or being able to restore health or spell charges
 
@@ -21,12 +22,13 @@ if it is a **spell**, **perk**, or **material**, this process is done automatica
 
 custom **wands** with lua scripts attached are safe to modify with this mod's wand editor, and any non-standard components are ignored
 
-for **entities**, you will have to manually register each entity you want to be able to spawn. This is done by first running the file `mods/sandbox_mode/files/ui/entity_list.lua`, then using the added function `add_entity_to_list(entity_path,entity_name,category)`. current entity categories can be seen in `/files/ui/vanilla_ents.lua` or in game. as it is now, there is `props` `wands` `enemies` `bosses` `pickups` `items`. you don't have to use one of the existing categories, though it is recomended in order to reduce UI clutter.
+for **entities**, you will have to manually register each entity you want to be able to spawn. This is done by modyfying the file `mods/sandbox_mode/files/ui/entity_list.lua`, using the added function `add_entity_to_list(entity_path,entity_name,category)`. current entity categories can be seen in `/files/ui/vanilla_ents.lua` or in game. as it is now, there is `props` `wands` `enemies` `bosses` `pickups` `items`. you don't have to use one of the existing categories, though it is recomended in order to reduce UI clutter.
 ```lua
-dofile_once("mods/sandbox_mode/files/ui/entity_list.lua")
+ModTextFileSetContent("mods/sandbox_mode/files/ui/entity_list.lua",ModTextFileGetContent("mods/sandbox_mode/files/ui/entity_list.lua")..[[
 add_entity_to_list("mods/my_mod/files/my_entity.xml","Cool Thing","item")
+]]
+)
 ```
-if nothing else, you can append or modify `/files/ui/vanilla_ents.lua` during mod initialization.
 
 ### how do i add custom actions?
 the `misc` tab is your best bet for general purpose functions. this will require modifying the source file `/files/ui/ui_main.lua` using `ModTextFileSetContent` and `ModTextFileGetContent`.
