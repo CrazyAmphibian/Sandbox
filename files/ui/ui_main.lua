@@ -11,7 +11,13 @@ dofile_once( "data/scripts/perks/perk_list.lua" )
 --wand spawning
 dofile_once("data/scripts/gun/procedural/gun_procedural.lua")
 
+--entities
+dofile_once("mods/sandbox_mode/files/ui/entity_list.lua")
+
+
 dofile_once("mods/sandbox_mode/files/tableserial.lua")
+
+
 
 function get_held_wand(entity) --thanks graham
 	local inv2comp = EntityGetFirstComponentIncludingDisabled(player, "Inventory2Component")
@@ -161,7 +167,9 @@ if not sandbox_mode_ui then
 		
 		potionoptions={show_liquid=true,show_gas=true,show_sand=true,show_solids=true,show_static=false,show_fx=false,targetmatcount=1000,spawnitem="potion",page=0},
 		
-		wandoptions={shuffle=false,capacity=3,mana=100,recharge=50,reload=30,fire=15,cast=1,spread=0}
+		wandoptions={shuffle=false,capacity=3,mana=100,recharge=50,reload=30,fire=15,cast=1,spread=0},
+		
+		entityoptions={category=nil,page=0},
 	}
 	svd=GlobalsGetValue("sandboxmode_saved_tp_locations")
 	--print(svd)
@@ -187,7 +195,7 @@ end
 
 if sandbox_ui_open then
 	
-	local menus={"spells","wands","perks","potions","teleport"}
+	local menus={"spells","wands","perks","entities","potions","teleport","misc"}
 	for i=1,#menus do
 		local m=menus[i]
 		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-50*((#menus+1)/2-i),40,menudata.active_menu==m and "["..m.."]" or m) then menudata.active_menu=m end
@@ -686,7 +694,62 @@ if sandbox_ui_open then
 		end
 		
 		
-	--elseif menudata.active_menu=="extra" then
+	elseif menudata.active_menu=="misc" then
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,65,"[refresh all spells]") then
+			GameRegenItemActionsInPlayer(player)
+		end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,75,"[restore HP]") then
+			local hpc=EntityGetFirstComponentIncludingDisabled(player,"DamageModelComponent")
+			ComponentSetValue2(hpc,"hp",ComponentGetValue2(hpc,"max_hp"))
+		end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,85,"[add 100,000 gold]") then
+			local hpc=EntityGetFirstComponentIncludingDisabled(player,"WalletComponent")
+			ComponentSetValue2(hpc,"money",100000+ComponentGetValue2(hpc,"money"))
+		end
+		if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,95,"[set infinite gold]") then
+			local hpc=EntityGetFirstComponentIncludingDisabled(player,"WalletComponent")
+			ComponentSetValue2(hpc,"mHasReachedInf",true)
+			ComponentSetValue2(hpc,"money",0x7FFFFFFFFFFFFFFF)
+		end
+		
+	
+	elseif menudata.active_menu=="entities" then
+		--entityoptions={category=nil,page=0},
+		for i=1,#ENTITY_CATEGORIES do
+			local cat=ENTITY_CATEGORIES[i]
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+75*(i-.5-#ENTITY_CATEGORIES/2),60, menudata.entityoptions.category==cat and ("["..cat.."]") or cat) then
+				menudata.entityoptions.category=cat
+				menudata.entityoptions.page=0
+			end
+		end
+		
+		
+		
+		if menudata.entityoptions.category then
+			ents=ENTITIES_BY_CATS[menudata.entityoptions.category]
+			local cols=1
+			local rows=26
+			
+			for i=1+menudata.entityoptions.page*rows, math.min(#ents,(1+menudata.entityoptions.page)*rows) do
+				local ent=ents[i]
+				
+				local lc
+				lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2,85+(i-1)*10, ent[2] ) and player
+				--GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,1)
+				--lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2+tw/4,85+(i-1)*10, "["..ent[1].."]" ) and player
+				if lc then
+					local x,y=EntityGetTransform(player)
+					EntityLoad(ent[1],x,y)
+				end
+				
+				GuiTooltip(sandbox_mode_ui,ent[1],"")
+			end
+		
+			GuiText(sandbox_mode_ui,width/2,70,string.format("page %i/%i",menudata.entityoptions.page+1,math.ceil(#ents/cols/rows) ) )
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-30,70,"<-") then menudata.entityoptions.page=math.max(menudata.entityoptions.page-1,0) end
+			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2+30,70,"->") then menudata.entityoptions.page=math.min(menudata.entityoptions.page+1,math.ceil(#ents/cols/rows)-1) end
+		end
+
 		
 	end
 	
