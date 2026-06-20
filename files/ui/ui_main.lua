@@ -183,13 +183,13 @@ if not sandbox_mode_ui then
 end
 
 local width,height=GuiGetScreenDimensions(sandbox_mode_ui)
-local gui_id=0
+local gui_id=1 --if it starts at 0 then it creates this weird bug where closing the sandbox menu shoots your wand.
 function gui_next_id() gui_id=gui_id+1 return gui_id end
 
 GuiOptionsAdd(sandbox_mode_ui,GUI_OPTION.Align_HorizontalCenter)
 
 
-if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,5,sandbox_ui_open and "SANDBOX" or "SANDBOX") then
+if GuiButton(sandbox_mode_ui,gui_next_id(),width/2,5,"SANDBOX") then
 	sandbox_ui_open=not sandbox_ui_open
 end
 

@@ -1,0 +1,46 @@
+<Mod
+    name="Sandbox Mode"
+    description="Ever wanted a dedicated place to mess around? Hate being punished for trying new things? Don't want to risk your run with unfamiliar content? Want to push the game to its limits? Having trouble testing your mods? If you said yes to one of these, this may be the mod for you.
+
+for bug reports,feature suggestions, contributions, or modder information, go to the github page: https://github.com/CrazyAmphibian/Sandbox
+
+About the mode
+
+sandbox mode is a separate game mode from vanilla noita. Using the game's save slot system, this means that you can start up a sandbox world without interfering with your normal game's save. This also means that you can have multiple sandbox worlds active at the same time.
+
+In Sandbox mode, the player is unable to be killed, even through polymorph. You can still take damage, but it will never be fatal.
+Additionally, when the world is created, you'll be provided with 3 perks (wand tinkering, unlimited spells, all seeing eye) at your spawn location to make testing a bit faster and easier.
+
+Besides that, you also have access to the 'Sandbox' menu, which has multiple sub-tabs of actions, including: spawning spells, spawning perks, teleporting to locations, spawning entities, modifying wands, and a few miscellaneous functions.
+
+
+Spell menu
+Allows for spawning of any spell, and includes some filtering toggles. Tip: right click a spell type to disable every other type.
+
+Wand menu
+Allows for editing of a wand's stats, while preserving its sprite and any attached scripts
+
+Perk menus
+Lets you spawn in any perk in the game, with a small amount of filtering.
+
+Entities menu
+Has preset entities and categories that you can chose to spawn. includes things ranging from tables to chests to bosses.
+
+Potions menu
+Allows the player to browse the game's materials, and spawn them in potions or powder pouches.
+
+Teleport menu
+Gives the player a list of preset location, as well as letting the player save their own locations to teleport to later, and also having a manual location setter with pixel-level control.
+
+Misc menu
+includes a small number of assorted functions, such as restoring health or giving gold.
+
+"
+	
+    tags="cheats,quality of life,game modes"
+    dont_upload_folders=".git,.github"
+    dont_upload_files="workshopimage.xcf,.gitattributes"
+
+
+> 
+</Mod>
