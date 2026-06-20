@@ -33,13 +33,11 @@ Teleport menu
 Gives the player a list of preset location, as well as letting the player save their own locations to teleport to later, and also having a manual location setter with pixel-level control.
 
 Misc menu
-includes a small number of assorted functions, such as restoring health or giving gold.
-
-"
+includes a small number of assorted functions, such as restoring health or giving gold."
 	
-    tags="cheats,quality of life,game modes"
-    dont_upload_folders=".git,.github"
-    dont_upload_files="workshopimage.xcf,.gitattributes"
+    tags="cheats,game modes,quality of life"
+    dont_upload_folders=".git|.github"
+    dont_upload_files="workshopimage.xcf|.gitattributes"
 
 
 > 
