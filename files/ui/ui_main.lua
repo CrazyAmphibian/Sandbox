@@ -730,11 +730,12 @@ if sandbox_ui_open then
 			local cols=1
 			local rows=26
 			
+			local n=0
 			for i=1+menudata.entityoptions.page*rows, math.min(#ents,(1+menudata.entityoptions.page)*rows) do
 				local ent=ents[i]
-				
+				n=n+1
 				local lc
-				lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2,85+(i-1)*10, ent[2] ) and player
+				lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2,85+(n-1)*10, ent[2] ) and player
 				--GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,1)
 				--lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2+tw/4,85+(i-1)*10, "["..ent[1].."]" ) and player
 				if lc then
