@@ -154,6 +154,22 @@ function display_perk(perk,x,y)
 	end
 end
 
+function display_object(entitydata,x,y)
+	GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,.5)
+	if GuiImageButton(sandbox_mode_ui,gui_next_id(),x,y,"","mods/sandbox_mode/files/ui/16pxsquarehalfopacity.png") and player then
+		local x,y=EntityGetTransform(player)
+		EntityLoad(entitydata.path,x,y)
+	end
+	
+	_,_,hovered=GuiGetPreviousWidgetInfo(sandbox_mode_ui)
+	if hovered then
+		GuiTooltip(sandbox_mode_ui,entitydata.name,entitydata.path)
+	end
+	
+	GuiImage(sandbox_mode_ui,gui_next_id(),x,y,entitydata.imagepath,1,entitydata.imagescale)
+
+end
+
 
 if not sandbox_mode_ui then
 	sandbox_mode_ui=GuiCreate()
@@ -727,24 +743,17 @@ if sandbox_ui_open then
 		
 		if menudata.entityoptions.category then
 			ents=ENTITIES_BY_CATS[menudata.entityoptions.category]
-			local cols=1
-			local rows=26
+			local cols=15
+			local rows=10
 			
 			local n=0
-			for i=1+menudata.entityoptions.page*rows, math.min(#ents,(1+menudata.entityoptions.page)*rows) do
+			for i=1+menudata.entityoptions.page*rows*cols, math.min(#ents,(1+menudata.entityoptions.page)*rows*cols) do
 				local ent=ents[i]
 				n=n+1
-				local lc
-				lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2,85+(n-1)*10, ent[2] ) and player
-				--GuiColorSetForNextWidget(sandbox_mode_ui,.5,.5,.5,1)
-				--lc=GuiButton(sandbox_mode_ui,gui_next_id(),width/2+tw/4,85+(i-1)*10, "["..ent[1].."]" ) and player
-				if lc then
-					local x,y=EntityGetTransform(player)
-					EntityLoad(ent[1],x,y)
-				end
-				
-				GuiTooltip(sandbox_mode_ui,ent[1],"")
+				display_object(ent,width/2 + 24*(((n-1)%cols)-((cols-1)/2)) ,85+math.floor((n-1)/cols)*24)
 			end
+			
+			GuiImageButton(sandbox_mode_ui,gui_next_id(),-1000,-1000,"","mods/sandbox_mode/files/ui/16pxsquare.png") --if you don't do this, then the last element's image won't render. thanks nolla.
 		
 			GuiText(sandbox_mode_ui,width/2,70,string.format("page %i/%i",menudata.entityoptions.page+1,math.ceil(#ents/cols/rows) ) )
 			if GuiButton(sandbox_mode_ui,gui_next_id(),width/2-30,70,"<-") then menudata.entityoptions.page=math.max(menudata.entityoptions.page-1,0) end

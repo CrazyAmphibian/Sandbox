@@ -1,5 +1,12 @@
-function add_entity_to_list(path,name,category)
-	local tab={path,name,category}
+function add_entity_to_list(path,name,category,imagepath,imagescale)
+	imagepath=imagepath or "mods/sandbox_mode/files/ui/16pxquestionmark.png"
+	imagescale=imagescale or 1.0
+	local tab={path,name,category,imagepath,imagescale}
+	tab.path=path
+	tab.name=name
+	tab.category=category
+	tab.imagepath=imagepath
+	tab.imagescale=imagescale
 	ENTITY_LIST[#ENTITY_LIST+1]=tab
 	
 	if category then
