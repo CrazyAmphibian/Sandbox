@@ -22,10 +22,10 @@ if it is a **spell**, **perk**, or **material**, this process is done automatica
 
 custom **wands** with lua scripts attached are safe to modify with this mod's wand editor, and any non-standard components are ignored
 
-for **entities**, you will have to manually register each entity you want to be able to spawn. This is done by modyfying the file `mods/sandbox_mode/files/ui/entity_list.lua`, using the added function `add_entity_to_list(entity_path,entity_name,category)`. current entity categories can be seen in `/files/ui/vanilla_ents.lua` or in game. as it is now, there is `props` `wands` `enemies` `bosses` `pickups` `items`. you don't have to use one of the existing categories, though it is recomended in order to reduce UI clutter.
+for **entities**, you will have to manually register each entity you want to be able to spawn. This is done by modifying the file `mods/sandbox_mode/files/ui/entity_list.lua`, using the added function `add_entity_to_list(entity_path,entity_name,category)`. current entity categories can be seen in `/files/ui/vanilla_ents.lua` or in game. as it is now, there is `props` `wands` `enemies` `bosses` `pickups` `items`. you don't have to use one of the existing categories, though it is recommended in order to reduce UI clutter.
 ```lua
 ModTextFileSetContent("mods/sandbox_mode/files/ui/entity_list.lua",ModTextFileGetContent("mods/sandbox_mode/files/ui/entity_list.lua")..[[
-add_entity_to_list("mods/my_mod/files/my_entity.xml","Cool Thing","item")
+add_entity_to_list("mods/my_mod/files/my_entity.xml","Cool Thing","item","mods/my_mod/files/my_sprite.png")
 ]]
 )
 ```
