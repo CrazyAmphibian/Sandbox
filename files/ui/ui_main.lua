@@ -166,7 +166,8 @@ function display_object(entitydata,x,y)
 		GuiTooltip(sandbox_mode_ui,entitydata.name,entitydata.path)
 	end
 	
-	GuiImage(sandbox_mode_ui,gui_next_id(),x,y,entitydata.imagepath,1,entitydata.imagescale)
+	local scale=16/math.max(GuiGetImageDimensions(sandbox_mode_ui,entitydata.imagepath))
+	GuiImage(sandbox_mode_ui,gui_next_id(),x,y,entitydata.imagepath,1,scale)
 
 end
 
